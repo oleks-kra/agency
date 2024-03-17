@@ -1,0 +1,24 @@
+doctype html 
+html
+  head 
+    block head
+      meta(charset='UTF-8')
+      meta(name='viewport' content='width=device-width, initial-scale=1.0')
+      link(rel='shortcut icon' type='/image/png' href='/img/favicon.png')
+      link(rel='stylesheet' href='/admin.min.css')
+      title #{title}
+
+  body
+    // HEADER
+    include _header
+
+    // NAVIGATION
+    include _navigation
+
+    // CONTENT
+    block content 
+      h1 Admin section
+    
+    // FOOTER
+    include _footer
+    script(src='/admin.bundle.js')

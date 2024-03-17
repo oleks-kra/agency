@@ -1,0 +1,21 @@
+extends ../base
+
+block content
+  h1=title
+  form(id="categoryForm" data-action=action enctype='multipart/form-data')
+    div.row
+      label(for="title") Title:
+        input(type="text" name="title" id="title" size="97" value=category.title)
+    div.row
+      label(for="metaDescription") Meta description:
+        textarea(name="metaDescription" id="metaDescription" cols="100" rows="3") #{category.metaDescription}
+    div.row
+      label(for="description") Description:
+        textarea(name="description" id="description" cols="100" rows="7") #{category.description}
+    div.row(class=`${action === 'create' ? 'hidden' : ''}`)
+      label(for="published") Published:
+        input(type="checkbox" name="published" id="published" checked=category.published)      
+    div
+        input(type="hidden" id="itemId" value=`${category.id ? category.id : ''}`)
+    div.row 
+      input(type="submit" value="submit")

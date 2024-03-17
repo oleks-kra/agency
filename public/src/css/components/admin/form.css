@@ -1,0 +1,9 @@
+/* form.css */
+textarea,
+input[type='text'],
+textarea {
+  display: block;
+}
+.row {
+  margin-bottom: 10px;
+}

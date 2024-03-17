@@ -1,0 +1,12 @@
+extends ../base
+
+block content
+  a(href=`http://localhost:3000/admin/blog/categories/form/${category._id}`) Edit category
+  h1 #{category.title}
+  p The following is the information we have about this category.
+  h2 Meta description 
+  p #{category.metaDescription}
+  h2 Description 
+  p #{category.description}
+  - var icon = category.published ? '✔' : '✘'
+  p Published: #{icon}

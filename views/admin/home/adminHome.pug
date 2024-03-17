@@ -1,0 +1,14 @@
+extends ../base
+
+block content
+  h1 Admin tools
+  p Admin uses this page to manage the agency website.
+  h2 Blog
+  h3 Manage categories
+  ul
+    li: a(href='http://localhost:3000/admin/blog/categories/form') Create a category
+    li: a(href='http://localhost:3000/admin/blog/categories') See all categories
+  h3 Manage articles
+  ul
+    li: a(href='http://localhost:3000/admin/blog/articles/form') Create an article
+    li: a(href='http://localhost:3000/admin/blog/articles') See all articles

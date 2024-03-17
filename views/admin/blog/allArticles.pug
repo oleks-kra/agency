@@ -1,0 +1,27 @@
+extends ../base
+
+mixin oneArticle(article)
+  tr
+    td: a(href=`http://localhost:3000/admin/blog/articles/${article._id}`) #{article.title}
+    td
+      if article.published
+        span ✔
+      else
+        span ✘
+    //- Before an article is deleted, the admin must enter the expected pass word, which we store in 'data-pass' and read in front-end JS
+    -var pass = article.title.split(' ')[0].toLowerCase()
+    td: a.delete(href=`http://localhost:3000/admin/blog/articles/${article._id}` data-resource-type='article' data-pass=pass data-resource-id=article._id) Delete
+
+block content
+  h1 #{title}
+  p: a(href='http://localhost:3000/admin/blog/articles/form') Create an article
+  table#manageRecords
+    thead
+      tr
+        th Title
+        th Published
+        th Delete
+    tbody
+      each article in articles
+        +oneArticle(article)
+    

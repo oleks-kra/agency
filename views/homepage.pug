@@ -1,0 +1,14 @@
+extends base
+
+mixin oneArticle(article)
+  li
+    p=article.title
+    p=article.content
+
+
+block content 
+  h1 Welcome
+  ul
+    each article in articles
+      +oneArticle(article)
+    

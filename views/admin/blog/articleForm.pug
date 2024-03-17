@@ -1,0 +1,41 @@
+extends ../base
+
+mixin oneCategory(category)
+  //- test if article is already assigned to the current category
+  - var checked = assignedCategoryIds.includes(category.id);
+  input(type="checkbox" id=category.id name="categories[]" value=category._id checked=checked)
+  | 
+  label(for=category.id) #{category.title}
+  br    
+
+block content
+  h1=title
+  form(id="articleForm" data-action=action enctype='multipart/form-data')
+    div.row
+      label(for="title") Title:
+        input(type="text" name="title" id="title" size="97" value=article.title)
+    div.row
+      label(for="metaDescription") Meta description:
+        textarea(name="metaDescription" id="metaDescription" cols="100" rows="3") #{article.metaDescription}
+    div.row
+      label(for="summary") Summary:
+        textarea(name="summary" id="summary" cols="100" rows="7") #{article.summary}
+    div.row
+      label(for="content") Content:
+        textarea(name="content" id="content" cols="100" rows="21") #{article.content}
+    //- Do not allow image upload for a 'create' action. Image can be uploaded only when the 'edit article' screen
+    div.row(class=`${action === 'create' ? 'hidden' : ''}`)
+      -var disabled = (action === 'create') ? true : false
+      input(type="file" accept="image/*" name="featuredImage" id="featuredImage" disabled=disabled)
+    div.row(class=`${action === 'create' ? 'hidden' : ''}`)
+      label(for="published") Published:
+        input(type="checkbox" name="published" id="published" checked=article.published)
+    //- Categories can only be assigned when an article is updated
+    if action === 'update'
+      div.row
+        each category in allCategories
+          +oneCategory(category)
+    div
+      input(type="hidden" id="itemId" value=`${article.id ? article.id : ''}`)
+    div.row 
+      input(type="submit" value="submit")

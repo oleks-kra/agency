@@ -1,0 +1,27 @@
+extends ../base
+
+block content
+  a(href=`http://localhost:3000/admin/blog/articles/form/${article._id}`) Edit article
+  h1 #{article.title}
+  p The following is the information we have about this article.
+  h2 Meta description 
+  p #{article.metaDescription}
+  h2 Summary 
+  p #{article.summary}
+  h2 Content
+  p #{article.content}
+  h2 Image
+  if article.featuredImage
+    - var smallImage = article.featuredImage.replace('.jpg', '_small.webp')
+    div: img(src=`/img/blog/article/covers/${article._id}/${smallImage}`)
+  else
+    p No featured image
+  h2 Categories
+  ul
+    each category in article.categories
+      li: a(href=`http://localhost:3000/admin/blog/categories/${category.id}`)= category.title
+    else
+      li No assigned categories
+  h2 Status
+  - var icon = article.published ? '✔' : '✘'
+  p Published: #{icon}

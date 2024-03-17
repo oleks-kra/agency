@@ -1,0 +1,27 @@
+extends ../base
+
+mixin oneCategory(category)
+  tr
+    td: a(href=`http://localhost:3000/admin/blog/categories/${category._id}`) #{category.title}
+    td
+      if category.published
+        span ✔
+      else
+        span ✘
+    //- Before an category is deleted, the admin must enter the expected pass word, which we store in 'data-pass' and read in front-end JS
+    -var pass = category.title.split(' ')[0].toLowerCase()
+    td: a.delete(href=`http://localhost:3000/admin/blog/categories/${category._id}` data-resource-type='category' data-pass=pass data-resource-id=category._id) Delete
+
+block content
+  h1 #{title}
+  p: a(href='http://localhost:3000/admin/blog/categories/form') Create a category
+  table#manageRecords
+    thead
+      tr
+        th Title
+        th Published
+        th Delete
+    tbody
+      each category in categories
+        +oneCategory(category)
+    

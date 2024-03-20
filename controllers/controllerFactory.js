@@ -143,6 +143,9 @@ const createOne = Model =>
     // create Mongoose document instance without saving
     const doc = new Model(filteredBody);
 
+    // ensure the document validates before creating a new directory
+    await doc.validate();
+
     // when article is created, a new directory is created to store its cover images
     if (Model.modelName === 'Article') {
       // attempt creating a directory to store article's cover image

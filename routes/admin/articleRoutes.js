@@ -5,11 +5,6 @@ const {
   getForm,
   getAll,
   getOne
-  /*createArticle,
-  getArticles,
-  getArticle,
-  updateArticle,
-  deleteArticle */
 } = require('../../controllers/admin/articleController');
 
 const router = express.Router();

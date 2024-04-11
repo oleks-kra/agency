@@ -1,12 +1,10 @@
 const path = require('path');
+const mongoose = require('mongoose');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const {
-  makeDirectory,
-  clearDirectory,
-  deleteDirectory
-} = require('../utils/fileSystem');
+const { makeDirectory } = require('../utils/fileSystem');
 const { filterRequestBody } = require('../utils/filterRequestBody');
+const processEmbeddedImages = require('../utils/processEmbeddedImages');
 
 // api/v1/resource/:id
 const deleteOne = Model =>
@@ -26,20 +24,7 @@ const deleteOne = Model =>
       );
     }
 
-    // when article is deleted, we also delete its covers folder with images
-    if (Model.modelName === 'Article') {
-      const directoryPath = path.join(
-        __dirname,
-        '../public/img/blog/article/covers/',
-        doc.id
-      );
-
-      // clear directory's contents
-      await clearDirectory(directoryPath);
-
-      // delete directory itself
-      await deleteDirectory(directoryPath);
-    }
+    // when article is deleted, we do the clean up in post-hook query middleware
 
     response.status(200).json({
       status: 'success',
@@ -58,12 +43,15 @@ const updateOne = Model =>
       update = filterRequestBody(
         request.body,
         'title',
-        'content',
+        'content', // value of 'content' is escaped
         'summary',
         'metaDescription',
         'categories',
-        'published'
+        'published',
+        'embededArticleImages' // just so I can grab this array in the pre-hook; can be an empty stringified array if no new images were added
       );
+
+      console.log('update.embededArticleImages', update.embededArticleImages);
 
       // FormData sent by front-end JavaScript might have request.body.categories in the form of a JSON string. If that's the case, we need to parse it back into object representation
       if (
@@ -88,6 +76,7 @@ const updateOne = Model =>
       );
     }
 
+    // pre-hook query middleware handles image embeds processing
     const doc = await Model.findByIdAndUpdate(
       {
         _id: request.params.id
@@ -116,6 +105,7 @@ const updateOne = Model =>
     });
   });
 
+// NOTE:
 const createOne = Model =>
   catchAsync(async (request, response, next) => {
     console.log('createOne() invoked');
@@ -146,18 +136,49 @@ const createOne = Model =>
     // ensure the document validates before creating a new directory
     await doc.validate();
 
-    // when article is created, a new directory is created to store its cover images
     if (Model.modelName === 'Article') {
-      // attempt creating a directory to store article's cover image
-      const directoryPath = path.join(
+      // ARTICLE COVER
+      // Article image cover is only added when article is updated. Here, we just create a directory to store the article's cover image
+      const articleCoverDir = path.join(
         __dirname,
         '../public/img/blog/article/covers/',
         doc.id
       );
-      await makeDirectory(directoryPath);
+      await makeDirectory(articleCoverDir);
+
+      // ARTICLE EMBEDDED IMAGES
+      // Create directory to store images (done once for each article, even if no images are passed)
+      const articleEmbededImagesDir = path.join(
+        __dirname,
+        '../public/img/blog/article/embeds/',
+        doc.id,
+        '/'
+      );
+      await makeDirectory(articleEmbededImagesDir);
+      // reference location of temporary folder for embeded images
+      const tempFolderPath = path.join(
+        __dirname,
+        '../public/img/blog/article/embeds/temp/'
+      );
+      console.log('BEFORE "processEmbeddedImages"');
+      // process embeded article images and get their _ids as an array
+      const embededImageIds = await processEmbeddedImages(
+        JSON.parse(request.body.embededArticleImages),
+        tempFolderPath,
+        articleEmbededImagesDir,
+        doc
+      );
+      console.log('ATFTER "processEmbeddedImages"');
+      // store IDs of images from the 'ArticleImages' collection as property of the article
+      if (
+        embededImageIds instanceof Array &&
+        embededImageIds.every(value => mongoose.isValidObjectId(value))
+      ) {
+        doc.embededImages = embededImageIds;
+      }
     }
 
-    // if we got this far, the directory has indeed been created
+    // if we got this far, covers directory was created, and all article embeds were stored and saved to db
     await doc.save();
 
     response.status(200).json({

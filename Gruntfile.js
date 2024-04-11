@@ -6,6 +6,7 @@ module.exports = function (grunt) {
       main: {
         src: [
           'public/src/css/reset.css',
+          'public/src/css/prism.css',
           'public/src/css/components/client/*.css'
         ],
         dest: 'public/main.css'
@@ -13,6 +14,7 @@ module.exports = function (grunt) {
       admin: {
         src: [
           'public/src/css/reset.css',
+          'public/src/css/prism.css',
           'public/src/css/components/admin/*.css'
         ],
         dest: 'public/admin.css'

@@ -27,7 +27,7 @@ async function handleFormSubmit(
       'embededArticleImages',
       JSON.stringify(embededArticleImages)
     );
-    // The files property of an <input type="file"> element is a FileList object containing all the files selected by the user. Even though you might only allow the selection of one file in your input element, the 'files' property still holds an array-like object of all selected files.
+    // The 'files' property of an <input type="file"> element is a FileList object containing all the files selected by the user. Even though you might only allow the selection of one file in your input element, the 'files' property still holds an array-like object of all selected files.
     formData.append(
       'featuredImage',
       formElem.querySelector('#featuredImage').files[0]

@@ -128,9 +128,6 @@ const tinyResizeImage = catchAsync(async (request, response, next) => {
     newName
   );
 
-  // mount new image name 'newName' on request so that the next middleware has access to it
-  //request.file.newName = newName;
-
   response.status(200).json({
     // whatever value is passed to 'location' will be used as image's 'src' attribute and stored in the DB for the article
     location: newName

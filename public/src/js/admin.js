@@ -17,14 +17,26 @@ document.addEventListener('DOMContentLoaded', function () {
         const result = await window.tinymce.get('content').uploadImages();
         console.log('result of calling .uploadImages():', result);
         // store an array of filenames
+        /*
+        {
+          uploadUrl: 'apple.jpg',
+          element: {
+            alt (String): alt attribute as set in TinyMCE editor
+            title (String): title attribute as set in TinyMCE editor
+            clientWidth (Number): image width as set in the Editor
+            clientHeight (Number): image height as set in the Editor
+          }
+        }
+        We can also grab image's ALT attribute and store it in the DB
+        */
         const embededArticleImages = result.map(image => image.uploadUri);
         console.log('embededArticleImages:', embededArticleImages);
         // only when images upload is successful, store article into the database.
         await handleFormSubmit(
           'article',
           articleFormElem,
-          'http://localhost:3000/api/v1/articles',
-          'http://localhost:3000/admin/blog/articles',
+          'http://localhost:3000/api/v1/articles', // processing API URL
+          'http://localhost:3000/admin/blog/articles', // return URL
           embededArticleImages
         );
       } catch (error) {

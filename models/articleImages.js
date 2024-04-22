@@ -13,7 +13,13 @@ const articleImagesSchema = new mongoose.Schema({
       true,
       'Image must come with an ID of an article it is associated with.'
     ]
-  }
+  },
+  sizes: [
+    {
+      width: Number,
+      flnm: String // image-480w.jpg
+    }
+  ]
 });
 
 const ArticleImage = mongoose.model('ArticleImage', articleImagesSchema);

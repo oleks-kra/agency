@@ -152,12 +152,18 @@ articleSchema.post('findOneAndUpdate', async function (updatedArticle, next) {
     let idsOfArticleImagesToDelete = []; // Array to store IDs of images (as ObjectIDs) to delete
     await Promise.all(
       persistedArticleImages.map(async persistedImage => {
-        const { _id, filename } = persistedImage;
+        // 'sizes' is an array of resized copies of the same image for RWD
+        const { _id, filename, sizes } = persistedImage;
+        // Check if image is no longer in the HTML content
         if (!imagesInHtml.includes(filename)) {
-          // Check if image is no longer in the HTML content
-          const pathToImage = articleImagesPath + filename;
-          console.log('pathToImage:', pathToImage);
-          await deleteFile(pathToImage); // Delete image from server
+          // delete responsive versions of the image
+          await Promise.all(
+            sizes.map(
+              async image => await deleteFile(articleImagesPath + image.flnm)
+            )
+          );
+          // delete the primary image itself
+          await deleteFile(articleImagesPath + filename); // Delete image from server
           idsOfArticleImagesToDelete.push(_id); // Store ObjectID of image to delete
         }
       })

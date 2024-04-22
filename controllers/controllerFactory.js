@@ -32,6 +32,7 @@ const deleteOne = Model =>
     });
   });
 
+// NOTE:
 // api/v1/resource/:id
 const updateOne = Model =>
   catchAsync(async (request, response, next) => {
@@ -105,7 +106,6 @@ const updateOne = Model =>
     });
   });
 
-// NOTE:
 const createOne = Model =>
   catchAsync(async (request, response, next) => {
     console.log('createOne() invoked');
@@ -155,7 +155,7 @@ const createOne = Model =>
         '/'
       );
       await makeDirectory(articleEmbededImagesDir);
-      // reference location of temporary folder for embeded images
+      // reference location of temporary folder where embeded article images are currently located
       const tempFolderPath = path.join(
         __dirname,
         '../public/img/blog/article/embeds/temp/'

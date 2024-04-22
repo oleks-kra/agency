@@ -68,14 +68,17 @@ const getOne = catchAsync(async (request, response, next) => {
     _id: request.params.id
   })
     .populate('categories', 'title slug')
+    .populate('embededImages')
     .exec();
 
+  console.log('article:', article);
   // decode article's content back into regular HTML
   article.content = decodeURIComponent(article.content);
   // replace filenames with true image paths
   const replaced = replaceImagePaths(
     article.content,
-    process.env.EMBEDED_IMAGES_PATH + article.id
+    process.env.EMBEDED_IMAGES_PATH + article.id,
+    article.embededImages
   );
   console.log('replaced:', replaced);
   article.content = replaced;

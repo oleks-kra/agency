@@ -1,5 +1,6 @@
 const ArticleImage = require('../models/articleImages');
-const { moveFiles, emptyDir } = require('./fileSystem');
+const { emptyDir } = require('./fileSystem');
+const generateResponsiveImageVersions = require('./generateResponsiveImageVersions');
 
 /**
  * Processes and handles embedded images associated with an article.
@@ -22,17 +23,32 @@ module.exports = async function processEmbeddedImages(
   console.log('START INSIDE "processEmbeddedImages"');
   if (imageFilenamesArr.length > 0) {
     const articleImagesToSave = [];
+    // 'widthSlots': 480,600,800,1200
+    const widthSlots = process.env.EMBEDED_IMAGE_WIDTH_SLOTS.split(',').map(
+      str => Number(str)
+    );
     const promises = imageFilenamesArr.map(async filename => {
       // Move image from 'tempFolderPath' folder to its permanent destination at 'embeddedImagesDir'
-      await moveFiles(
-        tempFolderPath + filename,
-        articleEmbeddedImagesDir + filename
+      const sizes = await generateResponsiveImageVersions(
+        tempFolderPath + filename, // original image path
+        articleEmbeddedImagesDir, // where to save
+        filename, // filename base to use
+        widthSlots, // sizes to create
+        Number(process.env.EMBEDED_IMAGE_MAX_WIDTH) // max pixel wide image to create
       );
       // Store an image object in an array to persist them all in one operation
-      articleImagesToSave.push({
-        filename,
-        articleId: doc.id
-      });
+      if (sizes.length > 0) {
+        articleImagesToSave.push({
+          filename,
+          articleId: doc.id,
+          sizes
+        });
+      } else {
+        articleImagesToSave.push({
+          filename,
+          articleId: doc.id
+        });
+      }
     });
 
     // Wait for all promises to resolve before continuing

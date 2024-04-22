@@ -1,4 +1,4 @@
-const ArticleImage = require('../models/articleImages');
+const ArticleImage = require('../models/articleEmbededImageModel');
 const { emptyDir } = require('./fileSystem');
 const generateResponsiveImageVersions = require('./generateResponsiveImageVersions');
 

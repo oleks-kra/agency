@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const path = require('path');
-const ArticleImage = require('./articleImages');
+const ArticleImage = require('./articleEmbededImageModel');
 const {
   deleteFile,
   clearDirectory,

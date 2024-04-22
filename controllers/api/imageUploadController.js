@@ -6,9 +6,10 @@ const AppError = require('../../utils/appError');
 const isImageWideEnough = require('../../utils/isImageWideEnough');
 const { clearDirectory } = require('../../utils/fileSystem');
 const createImages = require('../../utils/createImages');
+const tinyCreateImages = require('../../utils/tinyCreateImages');
 const { isValidObjectId } = require('../../utils/helpers');
 
-// Save file to memory so we can re-size it before storing it on the server. File info will contain a field named 'bugger' that stores the entire file
+// Save file to memory so we can re-size it before storing it on the server. File info will contain a field named 'buffer' that stores the entire file
 const multerStorage = multer.memoryStorage();
 
 // Accept only files that are image; skip others
@@ -100,7 +101,45 @@ const resizeImage = catchAsync(async (request, response, next) => {
   next();
 });
 
+// NOTE: TinyMCE
+const tinyMultipartFormData = upload.single('file');
+
+// 'tinyResizeImage()' is not called if article is submitted without embeded images
+const tinyResizeImage = catchAsync(async (request, response, next) => {
+  console.log('tinyResizeImage() invoked');
+
+  if (!request.file) {
+    console.log('Error: file is missing at request.file: tinyResizeImage()');
+    return next(new AppError('file is missing at request.file', 400));
+  }
+
+  const tempImageStorageDirectory = path.join(
+    __dirname,
+    '../../public/img/blog/article/embeds/temp/'
+  );
+
+  // come up with new name for the image as it will be saved in our DB
+  const uniqueId = Math.random().toString(36).substring(2, 6); // Generate a random string
+  const msString = new Date().getUTCMilliseconds(); // Get milliseconds
+  const newName = `${msString}-${uniqueId}-${request.file.originalname.split('.')[0]}.jpg`;
+  await tinyCreateImages(
+    request.file.buffer,
+    tempImageStorageDirectory,
+    newName
+  );
+
+  response.status(200).json({
+    // whatever value is passed to 'location' will be used as image's 'src' attribute and stored in the DB for the article
+    location: newName
+  });
+
+  // pass control to function that saves image filename to DB
+  //next();
+});
+
 module.exports = {
   processMultipartFormData,
-  resizeImage
+  resizeImage,
+  tinyMultipartFormData,
+  tinyResizeImage
 };

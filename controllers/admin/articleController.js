@@ -1,7 +1,7 @@
 const Article = require('../../models/articleModel');
 const Category = require('../../models/categoryModel');
 const catchAsync = require('../../utils/catchAsync');
-//const AppError = require('../../utils/appError');
+const { replaceImagePaths } = require('../../utils/parseHtml');
 
 const getForm = catchAsync(async (request, response, next) => {
   console.log('getForm() invoked');
@@ -13,9 +13,9 @@ const getForm = catchAsync(async (request, response, next) => {
     content: ''
   };
 
-  // 'categories' stores a full list of categories of the blog
+  // 'allCategories' stores a full list of categories of the blog
   let allCategories;
-  // 'listed' stores just an array of ObjectId strings the article already belogins to
+  // 'assignedCategoryIds' stores just an array of ObjectId strings the article already belogins to
   let assignedCategoryIds;
   // if we are updating the article
   if (request.params.id) {
@@ -27,6 +27,9 @@ const getForm = catchAsync(async (request, response, next) => {
       .populate('categories', 'title')
       .exec();
 
+    // decode html from article's content
+    article.content = decodeURIComponent(article.content);
+    console.log('decoded article content:', article.content);
     // reference ids of categories this article already belongs to
     assignedCategoryIds = article
       .populated('categories')
@@ -65,8 +68,20 @@ const getOne = catchAsync(async (request, response, next) => {
     _id: request.params.id
   })
     .populate('categories', 'title slug')
+    .populate('embededImages')
     .exec();
 
+  console.log('article:', article);
+  // decode article's content back into regular HTML
+  article.content = decodeURIComponent(article.content);
+  // replace filenames with true image paths
+  const replaced = replaceImagePaths(
+    article.content,
+    process.env.EMBEDED_IMAGES_PATH + article.id,
+    article.embededImages
+  );
+  console.log('replaced:', replaced);
+  article.content = replaced;
   response.status(200).render('admin/blog/oneArticle', {
     title: 'A single article',
     article

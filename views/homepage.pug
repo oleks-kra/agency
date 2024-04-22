@@ -3,7 +3,8 @@ extends base
 mixin oneArticle(article)
   li
     p=article.title
-    p=article.content
+    - var decodedArticleHtml = decodeURIComponent(article.content)
+    p !{decodedArticleHtml}
 
 
 block content 

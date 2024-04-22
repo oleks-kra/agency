@@ -89,7 +89,7 @@ export default function confirmDelete(e) {
   console.log('confirmDelete() invoked');
   e.preventDefault();
   const linkElem = e.target;
-  const pass = linkElem.dataset.pass;
+  const deletePassword = linkElem.dataset.pass;
   const resourceId = linkElem.dataset.resourceId;
   // 'resourceType' is either 'category' or 'article' and determines which API is being called
   const resourceType = linkElem.dataset.resourceType;
@@ -97,5 +97,10 @@ export default function confirmDelete(e) {
   linkElem.style.display = 'none';
 
   // 2. Display html form, and show expected value in placeholder attribute
-  createDeleteForm(resourceType, pass, resourceId, linkElem.parentElement);
+  createDeleteForm(
+    resourceType,
+    deletePassword,
+    resourceId,
+    linkElem.parentElement
+  );
 }

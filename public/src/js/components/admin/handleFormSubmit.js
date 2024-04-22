@@ -4,7 +4,8 @@ async function handleFormSubmit(
   resource,
   formElem,
   apiEndpointBase,
-  returnUrl
+  returnUrl,
+  embededArticleImages
 ) {
   console.log('handleFormSubmit() invoked');
   const formData = new FormData();
@@ -15,7 +16,18 @@ async function handleFormSubmit(
       formElem.querySelector('#metaDescription').value
     );
     formData.append('summary', formElem.querySelector('#summary').value);
-    formData.append('content', formElem.querySelector('#content').value);
+    // 'tinymce.get()' - Returns an editor instance for a given id.
+    // '.getContent()' - Gets the content from the editor instance
+    let articleHTML = tinymce.get('content').getContent();
+    // escape HTML coming from tinyMCE
+    articleHTML = encodeURIComponent(articleHTML);
+    formData.append('content', articleHTML);
+    // 'embededArticleImages' is an array of filenames (or an empty array), but .append() takes only values of type String, so I stringify it.
+    formData.append(
+      'embededArticleImages',
+      JSON.stringify(embededArticleImages)
+    );
+    // The 'files' property of an <input type="file"> element is a FileList object containing all the files selected by the user. Even though you might only allow the selection of one file in your input element, the 'files' property still holds an array-like object of all selected files.
     formData.append(
       'featuredImage',
       formElem.querySelector('#featuredImage').files[0]

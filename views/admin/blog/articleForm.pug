@@ -39,3 +39,7 @@ block content
       input(type="hidden" id="itemId" value=`${article.id ? article.id : ''}`)
     div.row 
       input(type="submit" value="submit")
+
+block prepend scripts
+  script(src="/prism.js")
+  script(src="https://cdn.tiny.cloud/1/mbqqz9pos7pymst8i8r81qti9qvlruo4qb8zu9ewmw6vd1vz/tinymce/6.8.3-25/tinymce.min.js" referrerpolicy="origin")

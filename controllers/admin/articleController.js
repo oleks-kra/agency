@@ -1,7 +1,10 @@
 const Article = require('../../models/articleModel');
 const Category = require('../../models/categoryModel');
 const catchAsync = require('../../utils/catchAsync');
-const { replaceImagePaths } = require('../../utils/parseHtml');
+const {
+  replaceImagePaths,
+  createCoverImage
+} = require('../../utils/parseHtml');
 
 const getForm = catchAsync(async (request, response, next) => {
   console.log('getForm() invoked');
@@ -67,21 +70,32 @@ const getOne = catchAsync(async (request, response, next) => {
   const article = await Article.findById({
     _id: request.params.id
   })
+    .populate('featuredImage')
     .populate('categories', 'title slug')
     .populate('embededImages')
     .exec();
 
   console.log('article:', article);
+
+  // ARTICLE BODY (content)
+
   // decode article's content back into regular HTML
   article.content = decodeURIComponent(article.content);
   // replace filenames with true image paths
-  const replaced = replaceImagePaths(
+  article.content = replaceImagePaths(
     article.content,
     process.env.EMBEDED_IMAGES_PATH + article.id,
     article.embededImages
   );
-  console.log('replaced:', replaced);
-  article.content = replaced;
+
+  // HEADER IMAGE
+  if (article.featuredImage) {
+    article.coverImage = createCoverImage(
+      process.env.ARTICLE_FEATURED_IMAGES_PATH + article.id,
+      article.featuredImage
+    );
+  }
+
   response.status(200).render('admin/blog/oneArticle', {
     title: 'A single article',
     article

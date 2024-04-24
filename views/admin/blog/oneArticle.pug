@@ -11,9 +11,9 @@ block content
   h2 Content
   div !{article.content}
   h2 Image
-  if article.featuredImage
-    - var largeImage = article.featuredImage.replace('.jpg', '_large.webp')
-    div: img(src=`/img/blog/article/covers/${article._id}/${largeImage}`)
+  if article.coverImage
+    div
+      != article.coverImage
   else
     p No featured image
   h2 Categories

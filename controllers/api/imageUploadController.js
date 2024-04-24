@@ -1,13 +1,18 @@
 const multer = require('multer');
 const path = require('path');
+const probe = require('probe-image-size');
 
+const ArticleCoverImage = require('../../models/articleCoverImageModel');
 const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 const isImageWideEnough = require('../../utils/isImageWideEnough');
 const { clearDirectory } = require('../../utils/fileSystem');
-const createImages = require('../../utils/createImages');
+const { createUniqueImageFilename } = require('../../utils/misc');
+const createResponsiveCovers = require('../../utils/createResponsiveCovers');
 const tinyCreateImages = require('../../utils/tinyCreateImages');
 const { isValidObjectId } = require('../../utils/helpers');
+
+const bufferToStream = require('../../utils/bufferToStream');
 
 // Save file to memory so we can re-size it before storing it on the server. File info will contain a field named 'buffer' that stores the entire file
 const multerStorage = multer.memoryStorage();
@@ -54,7 +59,7 @@ const resizeImage = catchAsync(async (request, response, next) => {
     return next(new AppError('Invalid article ID', 400));
   }
 
-  // ensure image is wide enough
+  // ensure image is wide enough, at 1200 pixels wide or wider
   const isWideEnough = await isImageWideEnough(
     request.file.buffer,
     process.env.ARTICLE_FEATURED_IMAGE_WIDTH
@@ -67,41 +72,59 @@ const resizeImage = catchAsync(async (request, response, next) => {
     );
   }
 
-  const directoryPath = path.join(
+  const coversDir = path.join(
     __dirname,
     '../../public/img/blog/article/covers/',
-    request.params.id
+    request.params.id,
+    '/'
   );
+  console.log('coversDir:', coversDir);
 
   // if a new image cover is being uploaded, clear the contents of the existing folder before adding new images
-  await clearDirectory(directoryPath);
+  await clearDirectory(coversDir);
 
   // come up with new name for the image as it will be saved in our DB
-  const newName = `${Date.now()}-${request.file.originalname.split('.')[0]}.jpg`;
+  const newName = createUniqueImageFilename(request.file.originalname);
 
   // store multiple versions of an image cover on server
-  const ratio = parseFloat(process.env.IMAGE_RATIO, 10) || 0.5625;
-  const width = parseInt(process.env.ARTICLE_FEATURED_IMAGE_WIDTH, 10) || 1200;
-  const resizeOptions = {
-    width: width,
-    height: parseInt(width * ratio, 10)
-  };
+  const maxWidth =
+    parseInt(process.env.ARTICLE_FEATURED_IMAGE_WIDTH, 10) || 1200;
 
-  await createImages(
+  const widthSlots = process.env.ARTICLE_FEATURED_IMAGE_WIDTH_SLOTS.split(
+    ','
+  ).map(slot => Number(slot));
+
+  const ratio = parseFloat(process.env.IMAGE_RATIO, 10) || 0.5625;
+  const maxHeight = parseInt(maxWidth * ratio, 10);
+
+  // 'createResponsiveCovers' creates multiple versions of the 'request.file.buffer' image and stores them all in the '/covers/article_id/*'
+  const sizes = await createResponsiveCovers(
     request.file.buffer,
-    directoryPath,
+    coversDir,
     newName,
-    resizeOptions
+    widthSlots,
+    maxWidth,
+    maxHeight
   );
 
+  // remove the existing document from 'ArticleCoverImage' before creating a new one
+  await ArticleCoverImage.deleteOne({ articleId: request.params.id });
+
+  // create a new one
+  const coverImageDoc = await ArticleCoverImage.create({
+    filename: newName,
+    height: maxHeight,
+    articleId: request.params.id,
+    sizes
+  });
+
   // mount new image name 'newName' on request so that the next middleware has access to it
-  request.file.newName = newName;
+  request.file.coverId = coverImageDoc.id;
 
   // pass control to function that saves image filename to DB
   next();
 });
 
-// NOTE: TinyMCE
 const tinyMultipartFormData = upload.single('file');
 
 // 'tinyResizeImage()' is not called if article is submitted without embeded images
@@ -119,9 +142,7 @@ const tinyResizeImage = catchAsync(async (request, response, next) => {
   );
 
   // come up with new name for the image as it will be saved in our DB
-  const uniqueId = Math.random().toString(36).substring(2, 6); // Generate a random string
-  const msString = new Date().getUTCMilliseconds(); // Get milliseconds
-  const newName = `${msString}-${uniqueId}-${request.file.originalname.split('.')[0]}.jpg`;
+  const newName = createUniqueImageFilename(request.file.originalname);
   await tinyCreateImages(
     request.file.buffer,
     tempImageStorageDirectory,

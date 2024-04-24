@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 const path = require('path');
 const ArticleImage = require('./articleEmbededImageModel');
+const ArticleCoverImage = require('./articleCoverImageModel');
 const {
   deleteFile,
   clearDirectory,
@@ -40,7 +41,8 @@ const articleSchema = new mongoose.Schema(
       trim: true
     },
     featuredImage: {
-      type: String
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ArticleCoverImage'
     },
     embededImages: [
       {
@@ -236,10 +238,14 @@ articleSchema.post('findOneAndDelete', async function (deletedArticle, next) {
   );
   await clearDirectory(articleEmbedsPath);
   await deleteDirectory(articleEmbedsPath);
-  // 3. Delete documents 'ArticleImages' documents where 'articleId' matches deletedArticle.id
+  // 3. Delete 'ArticleImages' documents where 'articleId' matches 'deletedArticle.id'
   await ArticleImage.deleteMany({
     articleId: deletedArticle._id
-  });
+  }).exec();
+  // 4. Delete 'ArticleCoverImages' documents where 'articleId' matches 'deletedArticle.id'
+  await ArticleCoverImage.deleteOne({
+    articleId: deletedArticle._id
+  }).exec();
 });
 
 const Article = mongoose.model('Article', articleSchema);

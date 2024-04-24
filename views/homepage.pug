@@ -5,6 +5,13 @@ mixin oneArticle(article)
     p=article.title
     - var decodedArticleHtml = decodeURIComponent(article.content)
     p !{decodedArticleHtml}
+    h2 Image
+    if article.coverImage
+      div
+        != article.coverImage
+    else
+      p No featured image
+
 
 
 block content 

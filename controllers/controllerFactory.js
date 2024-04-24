@@ -32,7 +32,6 @@ const deleteOne = Model =>
     });
   });
 
-// NOTE:
 // api/v1/resource/:id
 const updateOne = Model =>
   catchAsync(async (request, response, next) => {
@@ -62,8 +61,9 @@ const updateOne = Model =>
         update.categories = JSON.parse(request.body.categories);
 
       // if previous middlewares (only for article UPDATES) mounted an image to 'request.file'
+      // NOTE: instead of referencing filename, we should now be referencing ObjectId from 'ArticleCoverImage'
       if (request.file) {
-        update.featuredImage = request.file.newName;
+        update.featuredImage = request.file.coverId;
       }
     }
 

@@ -42,6 +42,16 @@ function generateSizesAttr(sizes) {
     .join(', ');
 }
 
+function createCoverImage(path, articleCoverDoc) {
+  console.log('createCoverImage() invoked');
+  const srcset = generateSrcsetAttr(path, articleCoverDoc.sizes);
+  const sizes = generateSizesAttr(articleCoverDoc.sizes);
+  const src = `${path}/${articleCoverDoc.filename}`;
+  const width = process.env.ARTICLE_FEATURED_IMAGE_WIDTH;
+  const { height } = articleCoverDoc;
+  return `<img width="${width}" height="${height}" src="${src}" srcset="${srcset}" sizes="${sizes}">`;
+}
+
 // 'htmlContent' is un-escaped HTML that contains image tags whose value is just the filename
 // 'imagePath' is the location of the folder where images for the current article are stored
 function replaceImagePaths(htmlContent, imagePath, embededImages) {
@@ -81,4 +91,8 @@ function parseEmbeddedImagesFromHTML(htmlContent) {
   return imgElements.map(img => img.getAttribute('src'));
 }
 
-module.exports = { replaceImagePaths, parseEmbeddedImagesFromHTML };
+module.exports = {
+  replaceImagePaths,
+  parseEmbeddedImagesFromHTML,
+  createCoverImage
+};

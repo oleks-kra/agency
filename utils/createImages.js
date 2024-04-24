@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = async function createImages(
   imageBuffer, // tempImagePath
-  dirPath,
+  outputDir,
   newName,
   resizeOptions
 ) {
@@ -18,7 +18,7 @@ module.exports = async function createImages(
   const mediumWidth = Math.round(resizeOptions.width * mediumRatio);
   const mediumHeight = Math.round(resizeOptions.height * mediumRatio);
 
-  const output = path.join(dirPath, newName);
+  const output = path.join(outputDir, newName);
 
   // temporarily disable cache to prevent images stuck in node.js
   sharp.cache(false);

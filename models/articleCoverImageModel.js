@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 
-const articleImagesSchema = new mongoose.Schema({
+const articleCoverImageSchema = new mongoose.Schema({
   filename: {
     type: String,
-    unique: [true, 'Image filename must be unique'],
     required: [true, 'An must have a filename.'],
     trim: true
   },
+  height: Number,
   articleId: {
     type: mongoose.Schema.Types.ObjectId,
+    unique: [
+      true,
+      'There cannot be more than one image cover associated with the same article.'
+    ],
     required: [
       true,
       'Image must come with an ID of an article it is associated with.'
@@ -22,6 +26,9 @@ const articleImagesSchema = new mongoose.Schema({
   ]
 });
 
-const ArticleImage = mongoose.model('ArticleImage', articleImagesSchema);
+const ArticleCoverImage = mongoose.model(
+  'ArticleCoverImage',
+  articleCoverImageSchema
+);
 
-module.exports = ArticleImage;
+module.exports = ArticleCoverImage;

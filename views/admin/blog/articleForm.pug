@@ -15,14 +15,23 @@ block content
       label(for="title") Title:
         input(type="text" name="title" id="title" size="97" value=article.title)
     div.row
-      label(for="metaDescription") Meta description:
-        textarea(name="metaDescription" id="metaDescription" cols="100" rows="3") #{article.metaDescription}
-    div.row
       label(for="summary") Summary:
         textarea(name="summary" id="summary" cols="100" rows="7") #{article.summary}
     div.row
       label(for="content") Content:
         textarea(name="content" id="content" cols="100" rows="21") #{article.content}
+
+    div.row
+      label(for="metaTitle") Meta title:
+        input(type="text" name="metaTitle" id="metaTitle" size="97" value=article.metaTitle)
+      .length-limit
+        span Used: 0 out of #{metaDataLengthLimits.metaTitle}
+    div.row
+      label(for="metaDescription") Meta description:
+        textarea(name="metaDescription" id="metaDescription" cols="100" rows="3") #{article.metaDescription}
+      .length-limit
+        span Used: 0 out of #{metaDataLengthLimits.metaDescription}        
+
     //- Do not allow image upload for a 'create' action. Image can be uploaded only when the 'edit article' screen
     div.row(class=`${action === 'create' ? 'hidden' : ''}`)
       -var disabled = (action === 'create') ? true : false

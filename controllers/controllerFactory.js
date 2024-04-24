@@ -45,6 +45,7 @@ const updateOne = Model =>
         'title',
         'content', // value of 'content' is escaped
         'summary',
+        'metaTitle',
         'metaDescription',
         'categories',
         'published',
@@ -110,7 +111,7 @@ const createOne = Model =>
   catchAsync(async (request, response, next) => {
     console.log('createOne() invoked');
 
-    // filter request body depending on the type of resource we are to create
+    // Filter request body depending on the type of resource we are to create. Only approved fields get sent to the database.
     let filteredBody;
     if (Model.modelName === 'Article') {
       filteredBody = filterRequestBody(
@@ -118,6 +119,7 @@ const createOne = Model =>
         'title',
         'content',
         'summary',
+        'metaTitle',
         'metaDescription'
       );
     }
@@ -133,12 +135,12 @@ const createOne = Model =>
     // create Mongoose document instance without saving
     const doc = new Model(filteredBody);
 
-    // ensure the document validates before creating a new directory
+    // ensure the document validates before creating a new directory to store article image covers
     await doc.validate();
 
     if (Model.modelName === 'Article') {
       // ARTICLE COVER
-      // Article image cover is only added when article is updated. Here, we just create a directory to store the article's cover image
+      // Article image cover is only added when article is updated. Here, we just create an empty directory to store the article's cover image
       const articleCoverDir = path.join(
         __dirname,
         '../public/img/blog/article/covers/',
@@ -160,7 +162,6 @@ const createOne = Model =>
         __dirname,
         '../public/img/blog/article/embeds/temp/'
       );
-      console.log('BEFORE "processEmbeddedImages"');
       // process embeded article images and get their _ids as an array
       const embededImageIds = await processEmbeddedImages(
         JSON.parse(request.body.embededArticleImages),
@@ -168,7 +169,6 @@ const createOne = Model =>
         articleEmbededImagesDir,
         doc
       );
-      console.log('ATFTER "processEmbeddedImages"');
       // store IDs of images from the 'ArticleImages' collection as property of the article
       if (
         embededImageIds instanceof Array &&

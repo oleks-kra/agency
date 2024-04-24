@@ -11,6 +11,7 @@ async function handleFormSubmit(
   const formData = new FormData();
   if (resource === 'article') {
     formData.append('title', formElem.querySelector('#title').value);
+    formData.append('metaTitle', formElem.querySelector('#metaTitle').value);
     formData.append(
       'metaDescription',
       formElem.querySelector('#metaDescription').value

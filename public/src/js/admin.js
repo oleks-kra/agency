@@ -8,11 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (articleFormElem && typeof window.tinymce !== 'undefined') {
     articleFormElem.addEventListener('submit', async function (e) {
       e.preventDefault();
-      // Add client-side validation to ensure the form is valid before uploading images to the server; otherwise, if something goes wrong, images get uploaded to the 'temp' folder?
       // Execute the editor.uploadImages() function BEFORE submitting the editor contents to the server to avoid storing images as Base64.
       try {
-        // Upload images to a temporary location. 'result' returns an array of newly inserted images that were uploaded, with image filename stored at '.uploadUri'
-        // Old images that were loaded into the Editor on article's update will not be part of the 'result'
+        // Upload images to a temporary location. 'result' returns an array of newly inserted images (old ones are ignored) that were just added to the article content, with image filename stored at '.uploadUri'
+        // Old images that were loaded into the Editor on article's 'update' will not be part of the 'result'
         // If no images were embeded into the article, an empty array is returned
         const result = await window.tinymce.get('content').uploadImages();
         console.log('result of calling .uploadImages():', result);
@@ -29,15 +28,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         We can also grab image's ALT attribute and store it in the DB
         */
-        const embededArticleImages = result.map(image => image.uploadUri);
-        console.log('embededArticleImages:', embededArticleImages);
+        const embededArticleFilenames = result.map(image => image.uploadUri);
+        console.log('embededArticleFilenames:', embededArticleFilenames);
         // only when images upload is successful, store article into the database.
         await handleFormSubmit(
           'article',
           articleFormElem,
           'http://localhost:3000/api/v1/articles', // processing API URL
           'http://localhost:3000/admin/blog/articles', // return URL
-          embededArticleImages
+          embededArticleFilenames
         );
       } catch (error) {
         console.log(`Error saving/updating the article: ${error.message}`);

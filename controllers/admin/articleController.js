@@ -11,6 +11,7 @@ const getForm = catchAsync(async (request, response, next) => {
 
   let article = {
     title: '',
+    metaTitle: '',
     metaDescription: '',
     summary: '',
     content: ''
@@ -32,24 +33,31 @@ const getForm = catchAsync(async (request, response, next) => {
 
     // decode html from article's content
     article.content = decodeURIComponent(article.content);
-    console.log('decoded article content:', article.content);
+
     // reference ids of categories this article already belongs to
     assignedCategoryIds = article
       .populated('categories')
       .map(objectId => objectId.toString());
 
-    // get all available category IDs as an array of ObjectId strings
+    // fetch a full list of categories present on the blog
     allCategories = await Category.find({}, 'title').exec();
   }
 
-  // let Pug template know which action we want our client-side script to perform by appending it form's dataset attribute
+  // let Pug template know which action we want our client-side script to perform by updating the data attribute of the html form <form data-action="">
   response.locals.action = request.params.id ? 'update' : 'create';
+
+  // character length limits for article's meta data
+  const metaDataLengthLimits = {
+    metaTitle: Number(process.env.MAX_META_TITLE_LENGTH),
+    metaDescription: Number(process.env.MAX_META_DESCRIPTION_LENGTH)
+  };
 
   response.status(200).render('admin/blog/articleForm', {
     title: request.params.id ? 'Update an article' : 'Create an article',
     article,
     allCategories,
-    assignedCategoryIds
+    assignedCategoryIds,
+    metaDataLengthLimits
   });
 });
 

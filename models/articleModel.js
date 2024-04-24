@@ -24,7 +24,6 @@ const articleSchema = new mongoose.Schema(
       default: Date.now()
     },
     categories: [
-      // When I update an article, all _ids we store here must be document _ids from the Category model.
       {
         type: 'ObjectId', // Alternatively: Schema.Types.ObjectId
         ref: 'Category'
@@ -54,13 +53,20 @@ const articleSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    metaDescription: {
+    metaTitle: {
       type: String,
-      required: [true, 'An article must have a meta description.'],
       trim: true,
       maxLength: [
-        166,
-        "An article's meta description must be 166 or fewer characters long."
+        Number(process.env.MAX_META_TITLE_LENGTH),
+        `Meta title must be ${process.env.MAX_META_TITLE_LENGTH} characters long or shorter`
+      ]
+    },
+    metaDescription: {
+      type: String,
+      trim: true,
+      maxLength: [
+        Number(process.env.MAX_META_DESCRIPTION_LENGTH),
+        `Meta description must be ${process.env.MAX_META_DESCRIPTION_LENGTH} characters long or shorter.`
       ]
     },
     slug: {

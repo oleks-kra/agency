@@ -481,8 +481,11 @@ textarea {
 .row {
   margin-bottom: 10px;
 }
-
-/* general.css */
+.asterisk {
+  color: red;
+  font-weight: bold;
+}
+/* form submit notifications */
 .success {
   color: green;
   font-weight: bold;
@@ -491,6 +494,11 @@ textarea {
   color: red;
   font-weight: bold;
 }
+.formErrorElem {
+  border: 1px solid red !important;
+}
+
+/* general.css */
 .hidden {
   display: none;
 }

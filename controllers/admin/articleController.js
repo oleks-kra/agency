@@ -52,12 +52,16 @@ const getForm = catchAsync(async (request, response, next) => {
     metaDescription: Number(process.env.MAX_META_DESCRIPTION_LENGTH)
   };
 
+  // required fields for the article (In Pug, displays an asterist next to each required field)
+  const requiredArticleFields = process.env.REQUIRED_ARTICLE_FIELDS.split(',');
+
   response.status(200).render('admin/blog/articleForm', {
     title: request.params.id ? 'Update an article' : 'Create an article',
     article,
     allCategories,
     assignedCategoryIds,
-    metaDataLengthLimits
+    metaDataLengthLimits,
+    requiredArticleFields
   });
 });
 

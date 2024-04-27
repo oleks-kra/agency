@@ -5,9 +5,9 @@ block content
   h1 #{article.title}
   p The following is the information we have about this article.
   h2 Meta title 
-  p #{article.metaTitle}
+  p #{article.metaTitle ? article.metaTitle : 'Meta title is missing'}
   h2 Meta description 
-  p #{article.metaDescription}
+  p #{article.metaDescription ? article.metaDescription : 'Meta description is missing'}
   h2 Summary 
   p #{article.summary}
   h2 Content

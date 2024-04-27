@@ -1,6 +1,8 @@
 import confirmDelete from './components/admin/confirmDelete';
 import handleFormSubmit from './components/admin/handleFormSubmit';
 import initTinyMCE from './components/admin/initTinyMCE';
+import { displayCharacterCount } from './components/admin/displayCharacterCount';
+import isFormInvalid from './components/admin/isFormInvalid';
 
 document.addEventListener('DOMContentLoaded', function () {
   // CREATE/UPDATE ARTICLE
@@ -8,6 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (articleFormElem && typeof window.tinymce !== 'undefined') {
     articleFormElem.addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      // prevent form submit if some of its fields do not pass validation
+      if (isFormInvalid(articleFormElem, tinymce.get('content'))) return;
+
       // Execute the editor.uploadImages() function BEFORE submitting the editor contents to the server to avoid storing images as Base64.
       try {
         // Upload images to a temporary location. 'result' returns an array of newly inserted images (old ones are ignored) that were just added to the article content, with image filename stored at '.uploadUri'
@@ -42,6 +48,23 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(`Error saving/updating the article: ${error.message}`);
       }
     });
+
+    const titleElem = articleFormElem.querySelector('#title');
+    titleElem &&
+      titleElem.addEventListener('blur', async function () {
+        const title = this.value.trim();
+        const slug = slugify(title, { lower: true });
+        const formData = new FormData();
+        formData.append('slug', slug);
+        await callApiAndRedirect(
+          formData,
+          'http://localhost:3000/api/v1/articles',
+          'get'
+        );
+      });
+
+    // display the number of characters entered into fields with length limits
+    displayCharacterCount(document.querySelectorAll('[data-track="length"]'));
   }
 
   // CREATE/UPDATE CATEGORY

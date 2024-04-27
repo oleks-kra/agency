@@ -1,36 +1,45 @@
 extends ../base
 
+mixin displayCharsLeft(maxChars, className)
+  div.charsUsed
+    span(aria-live="polite") 
+      | Used: 
+      span.charsCount(class=className) 0
+      |  out of #{maxChars}
+
 mixin oneCategory(category)
   //- test if article is already assigned to the current category
   - var checked = assignedCategoryIds.includes(category.id);
   input(type="checkbox" id=category.id name="categories[]" value=category._id checked=checked)
   | 
   label(for=category.id) #{category.title}
-  br    
+  br
 
 block content
   h1=title
   form(id="articleForm" data-action=action enctype='multipart/form-data')
     div.row
-      label(for="title") Title:
+      - const isTitleRequired = requiredArticleFields.includes('title');
+      - const titleAsterisk = isTitleRequired ? '<span class="asterisk">*</span>' : '';
+      label(for="title") Title!{titleAsterisk}:
         input(type="text" name="title" id="title" size="97" value=article.title)
     div.row
       label(for="summary") Summary:
         textarea(name="summary" id="summary" cols="100" rows="7") #{article.summary}
     div.row
-      label(for="content") Content:
+      - const isContentRequired = requiredArticleFields.includes('content');
+      - const contentAsterisk = isContentRequired ? '<span class="asterisk">*</span>' : '';    
+      label(for="content") Content!{contentAsterisk}:
         textarea(name="content" id="content" cols="100" rows="21") #{article.content}
 
     div.row
       label(for="metaTitle") Meta title:
-        input(type="text" name="metaTitle" id="metaTitle" size="97" value=article.metaTitle)
-      .length-limit
-        span Used: 0 out of #{metaDataLengthLimits.metaTitle}
+        input(type="text" name="metaTitle" id="metaTitle" maxlength=metaDataLengthLimits.metaTitle size="97" data-track="length" value=article.metaTitle)
+      +displayCharsLeft(metaDataLengthLimits.metaTitle, 'metaTitle')
     div.row
       label(for="metaDescription") Meta description:
-        textarea(name="metaDescription" id="metaDescription" cols="100" rows="3") #{article.metaDescription}
-      .length-limit
-        span Used: 0 out of #{metaDataLengthLimits.metaDescription}        
+        textarea(name="metaDescription" id="metaDescription" maxlength=metaDataLengthLimits.metaDescription  data-track="length" cols="100" rows="3") #{article.metaDescription}
+      +displayCharsLeft(metaDataLengthLimits.metaDescription, 'metaDescription')       
 
     //- Do not allow image upload for a 'create' action. Image can be uploaded only when the 'edit article' screen
     div.row(class=`${action === 'create' ? 'hidden' : ''}`)

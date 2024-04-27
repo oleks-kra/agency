@@ -7,3 +7,19 @@ textarea {
 .row {
   margin-bottom: 10px;
 }
+.asterisk {
+  color: red;
+  font-weight: bold;
+}
+/* form submit notifications */
+.success {
+  color: green;
+  font-weight: bold;
+}
+.error {
+  color: red;
+  font-weight: bold;
+}
+.formErrorElem {
+  border: 1px solid red !important;
+}

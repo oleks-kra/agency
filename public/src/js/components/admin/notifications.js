@@ -12,4 +12,19 @@ function notifyUser(status, msg) {
   document.body.insertAdjacentElement('afterbegin', element);
 }
 
-export { notifyUser };
+function clearFormErrorHighlights(elem, className) {
+  const formElem = elem.closest('form');
+  const oldErrorFields = Array.from(formElem.getElementsByClassName(className));
+  oldErrorFields.forEach(elem => elem.classList.remove(className));
+}
+
+function highlightFormErrorElem(elem, className) {
+  clearFormErrorHighlights(elem, className);
+  elem.classList.add(className);
+}
+
+function resetElemValue(elem) {
+  elem.value = '';
+}
+
+export { notifyUser, highlightFormErrorElem, resetElemValue };

@@ -15,7 +15,14 @@ const articleSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, 'An article must have a title.'],
+      required: [
+        function () {
+          // read the list of required article fields from config file
+          const requiredFields = process.env.REQUIRED_ARTICLE_FIELDS.split(',');
+          return requiredFields.includes('title');
+        },
+        'An article must have a title.'
+      ],
       unique: [true, "Article's title must be unique."],
       trim: true
     },
@@ -31,12 +38,18 @@ const articleSchema = new mongoose.Schema(
     ],
     content: {
       type: String,
-      required: [true, 'An article must have a body.'],
+      required: [
+        function () {
+          // read the list of required article fields from config file
+          const requiredFields = process.env.REQUIRED_ARTICLE_FIELDS.split(',');
+          return requiredFields.includes('title');
+        },
+        'An article must have content.'
+      ],
       trim: true
     },
     summary: {
       type: String,
-      required: [true, 'An article must have a summary.'],
       trim: true
     },
     featuredImage: {

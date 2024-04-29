@@ -3,6 +3,7 @@ import handleFormSubmit from './components/admin/handleFormSubmit';
 import initTinyMCE from './components/admin/initTinyMCE';
 import { displayCharacterCount } from './components/admin/displayCharacterCount';
 import isFormInvalid from './components/admin/isFormInvalid';
+import ensureUniqueField from './components/admin/ensureUniqueField';
 
 document.addEventListener('DOMContentLoaded', function () {
   // CREATE/UPDATE ARTICLE
@@ -22,20 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const result = await window.tinymce.get('content').uploadImages();
         console.log('result of calling .uploadImages():', result);
         // store an array of filenames
-        /*
-        {
-          uploadUrl: 'apple.jpg',
-          element: {
-            alt (String): alt attribute as set in TinyMCE editor
-            title (String): title attribute as set in TinyMCE editor
-            clientWidth (Number): image width as set in the Editor
-            clientHeight (Number): image height as set in the Editor
-          }
-        }
-        We can also grab image's ALT attribute and store it in the DB
-        */
         const embededArticleFilenames = result.map(image => image.uploadUri);
-        console.log('embededArticleFilenames:', embededArticleFilenames);
         // only when images upload is successful, store article into the database.
         await handleFormSubmit(
           'article',
@@ -49,19 +37,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
+    // ensure unique article 'title'
     const titleElem = articleFormElem.querySelector('#title');
     titleElem &&
-      titleElem.addEventListener('blur', async function () {
-        const title = this.value.trim();
-        const slug = slugify(title, { lower: true });
-        const formData = new FormData();
-        formData.append('slug', slug);
-        await callApiAndRedirect(
-          formData,
-          'http://localhost:3000/api/v1/articles',
-          'get'
-        );
-      });
+      ensureUniqueField(
+        titleElem,
+        'title', // MongoDB field name whose value must be unique
+        'http://localhost:3000/api/v1/uniqueness'
+      );
 
     // display the number of characters entered into fields with length limits
     displayCharacterCount(document.querySelectorAll('[data-track="length"]'));

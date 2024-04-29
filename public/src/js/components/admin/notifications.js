@@ -1,10 +1,10 @@
-function deleteNotification() {
-  const notification = document.getElementById('notification');
+function deleteNotification(idValue) {
+  const notification = document.getElementById(idValue);
   if (notification) notification.remove();
 }
 
 function notifyUser(status, msg) {
-  deleteNotification();
+  deleteNotification('notification');
   const element = document.createElement('div');
   element.setAttribute('id', 'notification');
   element.setAttribute('class', status);
@@ -27,4 +27,10 @@ function resetElemValue(elem) {
   elem.value = '';
 }
 
-export { notifyUser, highlightFormErrorElem, resetElemValue };
+export {
+  notifyUser,
+  highlightFormErrorElem,
+  resetElemValue,
+  deleteNotification,
+  clearFormErrorHighlights
+};

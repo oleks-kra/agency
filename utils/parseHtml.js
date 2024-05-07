@@ -1,19 +1,6 @@
 const { JSDOM } = require('jsdom');
 const { sortArrayOfObjectsByProp } = require('./misc');
 
-/*
-'sizes' is an array of objects, each of which includes: 
-{
-  width: 480,
-  flnm: "856-hl5u-large-480w.webp"
-}
-srcset="
-elva-480w.jpg 480w, 
-elva-600w.jpg 600w, 
-elva-800w.jpg 800w"
-elva-1200w.jpg 1200w"
-*/
-
 function generateSrcsetAttr(imagePath, sizes) {
   // make sure media queries appear in the ascending order
   const sortedAsc = sortArrayOfObjectsByProp(sizes, 'width');
@@ -22,13 +9,6 @@ function generateSrcsetAttr(imagePath, sizes) {
     .join(', ');
 }
 
-/*
-  sizes="
-(max-width: 480px) 480px,
-(max-width: 600px) 600px,
-(max-width: 800px) 800px,
-1200px"
-*/
 function generateSizesAttr(sizes) {
   const sortedAsc = sortArrayOfObjectsByProp(sizes, 'width');
   return sortedAsc

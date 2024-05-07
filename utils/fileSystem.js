@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const path = require('path');
 
 async function emptyDir(folderPath) {
   console.log('emptyDir() invoked');
@@ -68,11 +69,33 @@ async function clearDirectory(folderPath) {
   }
 }
 
+// Define a function to read image filenames from the directory
+async function readImageFilenamesFromDirectory(directoryPath) {
+  try {
+    // Read the contents of the directory
+    const files = await fs.readdir(directoryPath);
+
+    // Filter the list of files to include only image files
+    const imageExtensions = ['.jpg', '.jpeg', '.png'];
+    const imageFilenames = files.filter(filename => {
+      const extension = path.extname(filename).toLowerCase();
+      return imageExtensions.includes(extension);
+    });
+
+    // Return the array of image filenames
+    return imageFilenames;
+  } catch (error) {
+    console.error(`readImageFilenamesFromDirectory() error: ${error.message}`);
+    throw error;
+  }
+}
+
 module.exports = {
   makeDirectory,
   clearDirectory,
   deleteDirectory,
   deleteFile,
   moveFiles,
-  emptyDir
+  emptyDir,
+  readImageFilenamesFromDirectory
 };

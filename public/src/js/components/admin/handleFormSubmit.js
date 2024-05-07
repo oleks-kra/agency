@@ -20,6 +20,10 @@ async function handleFormSubmit(
     // 'tinymce.get()' - Returns an editor instance for a given id.
     // '.getContent()' - Gets the content from the editor instance
     let articleHTML = tinymce.get('content').getContent();
+    console.log('un-encoded articleHTML:', articleHTML);
+
+    // 1.
+
     // escape HTML coming from tinyMCE
     articleHTML = encodeURIComponent(articleHTML);
     formData.append('content', articleHTML);

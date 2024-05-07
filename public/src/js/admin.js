@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
 
       // prevent form submit if some of its fields do not pass validation
-      if (isFormInvalid(articleFormElem, tinymce.get('content'))) return;
+      // if (isFormInvalid(articleFormElem, tinymce.get('content'))) return;
 
       // Execute the editor.uploadImages() function BEFORE submitting the editor contents to the server to avoid storing images as Base64.
       try {
-        // Upload images to a temporary location. 'result' returns an array of newly inserted images (old ones are ignored) that were just added to the article content, with image filename stored at '.uploadUri'
+        // Upload images to a temporary location. 'result' returns an array of newly inserted images that were just added to the article content, with image filename stored at '.uploadUri'
         // Old images that were loaded into the Editor on article's 'update' will not be part of the 'result'
         // If no images were embeded into the article, an empty array is returned
         const result = await window.tinymce.get('content').uploadImages();
@@ -38,13 +38,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ensure unique article 'title'
-    const titleElem = articleFormElem.querySelector('#title');
+    /*     const titleElem = articleFormElem.querySelector('#title');
     titleElem &&
       ensureUniqueField(
         titleElem,
         'title', // MongoDB field name whose value must be unique
         'http://localhost:3000/api/v1/uniqueness'
-      );
+      ); */
 
     // display the number of characters entered into fields with length limits
     displayCharacterCount(document.querySelectorAll('[data-track="length"]'));

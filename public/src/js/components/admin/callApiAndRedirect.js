@@ -18,6 +18,10 @@ async function callApiAndRedirect(
     if (responseBody.status === 'success') {
       window.location.assign(returnUrl);
     } else {
+      // asynchronously initiate server-side cleanup process
+      // 1. Remove images from the temp folder
+
+      // let user know about the error
       notifyUser('error', responseBody.message || 'Failed to save resource.');
     }
   } catch (error) {

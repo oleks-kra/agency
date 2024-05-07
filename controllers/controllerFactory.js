@@ -5,6 +5,8 @@ const AppError = require('../utils/appError');
 const { makeDirectory } = require('../utils/fileSystem');
 const { filterRequestBody } = require('../utils/filterRequestBody');
 const processEmbeddedImages = require('../utils/processEmbeddedImages');
+const { addMissingImagesFromTemp } = require('../utils/misc');
+const { parseEmbeddedImagesFromHTML } = require('../utils/parseHtml');
 
 // api/v1/resource/:id
 const deleteOne = Model =>
@@ -62,7 +64,6 @@ const updateOne = Model =>
         update.categories = JSON.parse(request.body.categories);
 
       // if previous middlewares (only for article UPDATES) mounted an image to 'request.file'
-      // NOTE: instead of referencing filename, we should now be referencing ObjectId from 'ArticleCoverImage'
       if (request.file) {
         update.featuredImage = request.file.coverId;
       }
@@ -135,7 +136,7 @@ const createOne = Model =>
     // create Mongoose document instance without saving
     const doc = new Model(filteredBody);
 
-    // ensure the document validates before creating a new directory to store article image covers
+    // ensure the document validates before working with its images
     await doc.validate();
 
     if (Model.modelName === 'Article') {
@@ -162,9 +163,23 @@ const createOne = Model =>
         __dirname,
         '../public/img/blog/article/embeds/temp/'
       );
+
+      /* 
+      At the time of article submission there might be a validation error that prevents the article from being saved in the DB. Yet, by that time we have already moved TinyMCE editor images to the /temp/ folder. The admin might have fixed the validation error and is attempting to save the article again. The editor content no longer stores blob's of images that TinyMCE treats as new local images. It instead stores or might store filenames of images as they have been saved in the '/temp/' folder. We parse the HTML 'content' to extract filenames of each image, and 1.) if that image does not exist in the 'embededArticleFilenames' (list of newly inserted images) AND 2.) the image is found in the '/temp/' folder, then we add its filename to the 'embededArticleFilenames' to be passed to the function responsible for moving images from '/temp/' to their permanent location.
+      */
+
+      const filenamesInArticleHtml = parseEmbeddedImagesFromHTML(
+        decodeURIComponent(request.body.content)
+      );
+      const embededArticleFilenames = await addMissingImagesFromTemp(
+        filenamesInArticleHtml,
+        JSON.parse(request.body.embededArticleImages),
+        tempFolderPath
+      );
+
       // process embeded article images and get their _ids as an array
       const embededImageIds = await processEmbeddedImages(
-        JSON.parse(request.body.embededArticleImages),
+        embededArticleFilenames,
         tempFolderPath,
         articleEmbededImagesDir,
         doc
